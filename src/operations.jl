@@ -22,6 +22,7 @@ derivate(n::SymbNode) = 1
 derivate(n::AddNode) = AddNode(derivate(n.n1), derivate(n.n2))
 derivate(n::SubNode) = SubNode(derivate(n.n1), derivate(n.n2))
 derivate(n::ProdNode) = AddNode(ProdNode(derivate(n.n1), n.n2), ProdNode(n.n1, derivate(n.n2)))
+derivate(n::DivNode) = DivNode(SubNode(ProdNode(derivate(n.n1), n.n2), ProdNode(n.n1, derivate(n.n2))), PowNode(n[2], ConstNode(2)))
 derivate(n::PowNode) = ProdNode(ProdNode(n.n2, derivate(n.n1)), PowNode(n.n1, ConstNode(n.n2[1] - 1)))
 
 derivate(tree::NSyntaxTree) = NSyntaxTree(deriva
