@@ -92,6 +92,21 @@ function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 ProdNode(n1::NodeType, n2::NodeType) = ProdNode(_make_node(n1), _make_node(n2))
 
+function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
+    if n1 isa ConstNode && n2 isa ConstNode
+        return ConstNode(n1.n / n2.n)
+    elseif iszero(n1) && !iszero(n2)
+        return ConstNode(0)
+    elseif iszero(n2)
+        throw(ZeroDivisionError("can create a node that divide by 0"))
+    elseif isone(n2)
+        return n1
+    else
+        return DivNode{typeof(n1), typeof(n2)}(n1, n2)
+    end
+end
+DivNode(n1::NodeType, n2::NodeType) = DivNode(_make_node(n1), _make_node(n2))
+
 struct PowNode{T <: NSyntaxNode, N <: NSyntaxNode}
     n1::T
     n2::N
@@ -111,6 +126,19 @@ function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 PowNode(n1::NodeType, n2::NodeType) = PowNode(_make_node(n1), _make_node(n2))
 
+## Todo : Add checks for non n positive values
+struct LnNode{T<:NSyntaxNode} <: NSyntaxNode
+    n::T
+end
+LnNode(n::NSyntaxNode) = LnNode{typeof(n)}(n)
+LnNode(n::NodeType) = LnNode(_make_node(n))
+
+struct LogNode{T<:NSyntaxNode} <: NSyntaxNode
+    n::T
+end
+LogNode(n::NSyntaxNode) = LogNode{typeof(n)}(n)
+LogNode(n::NodeType) = LogNode(_make_node(n))
+
 ### Spaces function 
 
 setvar(space::SymbolicSpace{T}, s::Symbol, val) = (space.var[s] = convert(T, val))
@@ -123,18 +151,20 @@ Base.getindex(n::NSyntaxNode, I::Integer) = begin
     getfield(n, fields[I])
 end
 
-
-te(tree.root))
-
 ## TODO : Add more operator when the code base will be ready
 getop(::AddNode) = :+
 getop(::SubNode) = :-
 getop(::ProdNode) = :*
+getop(::DivNode) = :/
 getop(::PowNode) = :^
+getop(::LnNode) = :ln
+getop(::LogNode) = :log
 
 toexpr(n::ConstNode) = n.n
 toexpr(n::SymbNode) = n.n
 toexpr(n::NSyntaxNode) = Expr(:call, getop(n), toexpr(n.n1), toexpr(n.n2))
+toexpr(n::LnNode) = Expr(:call, getop(n), toexpr(n[1]))
+toexpr(n::LogNode) = Expr(:call, getop(n), toexpr(n[1]))
 
 totree(ex::Expr) = NSyntaxTree(_make_node(ex))
 
@@ -143,7 +173,10 @@ _make_node(s::Symbol) = SymbNode(s)
 _make_node(::Val{:+}, n1::NodeType, n2::NodeType) = AddNode(n1, n2)
 _make_node(::Val{:-}, n1::NodeType, n2::NodeType) = SubNode(n1, n2)
 _make_node(::Val{:*}, n1::NodeType, n2::NodeType) = ProdNode(n1, n2)
+_make_node(::Val{:/}, n1::NodeType, n2::NodeType) = DivNode(n1, n2)
 _make_node(::Val{:^}, n1::NodeType, n2::NodeType) = PowNode(n1, n2)
+_make_node(::Val{:ln}, n::NodeType) = LnNode(n)
+_make_node(::Val{:log}, n::NodeType) = LogNode(n)
 _make_node(ex::Expr) = begin
     ch = ex.args
     if length(ch) == 2
@@ -160,6 +193,7 @@ Base.eval(tr::NSyntaxTree, var::Dict) = eval(tr.root, var)
 Base.eval(n::AddNode, var::Dict) = eval(n[1], var) + eval(n[2], var)
 Base.eval(n::SubNode, var::Dict) = eval(n[1], var) - eval(n[2], var)
 Base.eval(n::ProdNode, var::Dict) = eval(n[1], var) * eval(n[2], var)
+Base.eval(n::DivNode, var::Dict) = eval(n[1], var) / eval(n[2], var)
 Base.eval(n::PowNode, var::Dict) = eval(n[1], var) ^ eval(n[2], var)
 Base.eval(n::ConstNode, var::Dict) = n[1]
 Base.eval(s::SymbNode, var::Dict) = var[s[1]]
