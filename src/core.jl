@@ -157,8 +157,8 @@ getop(::SubNode) = :-
 getop(::ProdNode) = :*
 getop(::DivNode) = :/
 getop(::PowNode) = :^
-getop(::LnNode) = :ln
-getop(::LogNode) = :log
+getop(::LnNode) = :log
+getop(::LogNode) = :log10
 
 toexpr(n::ConstNode) = n.n
 toexpr(n::SymbNode) = n.n
