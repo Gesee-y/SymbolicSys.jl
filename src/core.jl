@@ -146,7 +146,7 @@ LogNode(n::NodeType) = LogNode(_make_node(n))
 
 ### Spaces function 
 
-setvar(space::SymbolicSpace{T}, s::Symbol, val) = (space.var[s] = convert(T, val))
+setvar(space::SymbolicSpace{T}, s::Symbol, val) where T = (space.var[s] = convert(T, val))
 
 ####### Operations
 
