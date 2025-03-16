@@ -38,7 +38,7 @@ end
 struct AddNode{T <: NSyntaxNode, N <: NSyntaxNode}
     n1::T
     n2::N
-    AddNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new(n1, n2)
+    AddNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
 end
 
 function AddNode(n1::NSyntaxNode, n2::NSyntaxNode)
@@ -57,7 +57,7 @@ AddNode(n1::NodeType, n2::NodeType) = AddNode(_make_node(n1), _make_node(n2))
 struct SubNode{T <: NSyntaxNode, N <: NSyntaxNode}
     n1::T
     n2::N
-    SubNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new(n1, n2)
+    SubNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
 end
 
 function SubNode(n1::NSyntaxNode, n2::NSyntaxNode)
@@ -74,7 +74,7 @@ SubNode(n1::NodeType, n2::NodeType) = SubNode(_make_node(n1), _make_node(n2))
 struct ProdNode{T <: NSyntaxNode, N <: NSyntaxNode}
     n1::T
     n2::N
-    ProdNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new(n1, n2)
+    ProdNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
 end
 
 function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
@@ -92,6 +92,11 @@ function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 ProdNode(n1::NodeType, n2::NodeType) = ProdNode(_make_node(n1), _make_node(n2))
 
+struct DivNode{T <: NSyntaxNode, N <: NSyntaxNode}
+    n1::T
+    n2::N
+    DivNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
+end
 function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
     if n1 isa ConstNode && n2 isa ConstNode
         return ConstNode(n1.n / n2.n)
@@ -110,7 +115,7 @@ DivNode(n1::NodeType, n2::NodeType) = DivNode(_make_node(n1), _make_node(n2))
 struct PowNode{T <: NSyntaxNode, N <: NSyntaxNode}
     n1::T
     n2::N
-    PowNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new(n1, n2)
+    PowNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
 end
 
 function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
