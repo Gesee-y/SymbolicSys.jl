@@ -16,8 +16,8 @@ is_leave(n) = isempty(get_children(n))
 negate(n::NSyntaxNode) = n
 
 derivate(n::Number) = 0
-derivate(n::ConstNode) = 0
-derivate(n::SymbNode) = 1
+derivate(n::ConstNode) = ConstNode(0)
+derivate(n::SymbNode) = ConstNode(1)
 
 derivate(n::AddNode) = AddNode(derivate(n.n1), derivate(n.n2))
 derivate(n::SubNode) = SubNode(derivate(n.n1), derivate(n.n2))
