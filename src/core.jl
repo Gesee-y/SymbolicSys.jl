@@ -5,7 +5,7 @@
 abstract type AbstractCodeSpace end
 abstract type NSyntaxNode end
 
-const NodeType = Union{Number, Expr, Symbol}
+const NodeType = Union{Number, Symbol, Expr}
 
 struct NSyntaxTree{T <: NSyntaxNode}
     root::T
@@ -35,115 +35,120 @@ struct SymbNode <: NSyntaxNode
     n::Symbol
 end
 
-struct AddNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
-    n1::T
-    n2::N
-    AddNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
-end
-
-function AddNode(n1::NSyntaxNode, n2::NSyntaxNode)
-    if n1 isa ConstNode && n2 isa ConstNode
-        return ConstNode(n1.n + n2.n)
-    elseif iszero(n1)
-        return n2
-    elseif iszero(n2)
-        return n1
-    else
-        return AddNode{typeof(n1), typeof(n2)}(n1, n2)
+struct AddNode <: NSyntaxNode
+    n1::NSyntaxNode
+    n2::NSyntaxNode
+    
+    function AddNode(n1::NSyntaxNode, n2::NSyntaxNode)
+        if n1 isa ConstNode && n2 isa ConstNode
+            return ConstNode(n1.n + n2.n)
+        elseif iszero(n1)
+            return n2
+        elseif iszero(n2)
+            return n1
+        else
+            return new(n1, n2)
+        end
     end
 end
+
 AddNode(n1::NodeType, n2::NodeType) = AddNode(_make_node(n1), _make_node(n2))
 
-struct SubNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
-    n1::T
-    n2::N
-    SubNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
-end
+struct SubNode <: NSyntaxNode
+    n1::NSyntaxNode
+    n2::NSyntaxNode
 
-function SubNode(n1::NSyntaxNode, n2::NSyntaxNode)
-    if n1 isa ConstNode && n2 isa ConstNode
-        return ConstNode(n1.n - n2.n)
-    elseif iszero(n2)
-        return n1
-    else
-        return SubNode{typeof(n1), typeof(n2)}(n1, n2)
+    function SubNode(n1::NSyntaxNode, n2::NSyntaxNode)
+        if n1 isa ConstNode && n2 isa ConstNode
+            return ConstNode(n1.n - n2.n)
+        elseif iszero(n2)
+            return n1
+        else
+            return new(n1, n2)
+        end
     end
 end
+
+
 SubNode(n1::NodeType, n2::NodeType) = SubNode(_make_node(n1), _make_node(n2))
 
-struct ProdNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
-    n1::T
-    n2::N
-    ProdNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
-end
+struct ProdNode <: NSyntaxNode
+    n1::NSyntaxNode
+    n2::NSyntaxNode
 
-function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
-    if n1 isa ConstNode && n2 isa ConstNode
-        return ConstNode(n1.n * n2.n)
-    elseif iszero(n1) || iszero(n2)
-        return ConstNode(0)
-    elseif isone(n1)
-        return n2
-    elseif isone(n2)
-        return n1
-    else
-        return ProdNode{typeof(n1), typeof(n2)}(n1, n2)
+    function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
+        if n1 isa ConstNode && n2 isa ConstNode
+            return ConstNode(n1.n * n2.n)
+        elseif iszero(n1) || iszero(n2)
+            return ConstNode(0)
+        elseif isone(n1)
+            return n2
+        elseif isone(n2)
+            return n1
+        else
+            return new(n1, n2)
+        end
     end
 end
 ProdNode(n1::NodeType, n2::NodeType) = ProdNode(_make_node(n1), _make_node(n2))
 
-struct DivNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
-    n1::T
-    n2::N
-    DivNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
-end
-function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
-    if n1 isa ConstNode && n2 isa ConstNode
-        return ConstNode(n1.n / n2.n)
-    elseif iszero(n1) && !iszero(n2)
-        return ConstNode(0)
-    elseif iszero(n2)
-        throw(ZeroDivisionError("can create a node that divide by 0"))
-    elseif isone(n2)
-        return n1
-    else
-        return DivNode{typeof(n1), typeof(n2)}(n1, n2)
+struct DivNode <: NSyntaxNode
+    n1::NSyntaxNode
+    n2::NSyntaxNode
+    
+    function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
+        if n1 isa ConstNode && n2 isa ConstNode
+            return ConstNode(n1.n / n2.n)
+        elseif iszero(n1) && !iszero(n2)
+            return ConstNode(0)
+        elseif iszero(n2)
+            throw(ZeroDivisionError("can create a node that divide by 0"))
+        elseif isone(n2)
+            return n1
+        else
+            return DivNode(n1, n2)
+        end
     end
 end
+
 DivNode(n1::NodeType, n2::NodeType) = DivNode(_make_node(n1), _make_node(n2))
 
-struct PowNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
-    n1::T
-    n2::N
-    PowNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
-end
-
-function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
-    if n1 isa ConstNode && n2 isa ConstNode
-        return ConstNode(n1.n ^ n2.n)
-    elseif iszero(n1)
-        return ConstNode(0)
-    elseif iszero(n2)
-        return ConstNode(1)
-    else
-        return PowNode{typeof(n1), typeof(n2)}(n1, n2)
+struct PowNode <: NSyntaxNode
+    n1::NSyntaxNode
+    n2::NSyntaxNode
+    
+    function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
+        if n1 isa ConstNode && n2 isa ConstNode
+            return ConstNode(n1.n ^ n2.n)
+        elseif iszero(n1)
+            return ConstNode(0)
+        elseif iszero(n2)
+            return ConstNode(1)
+        else
+            return new(n1, n2)
+        end
     end
 end
+
+
 PowNode(n1::NodeType, n2::NodeType) = PowNode(_make_node(n1), _make_node(n2))
 
 ## Todo : Add checks for non n positive values
-struct LnNode{T<:NSyntaxNode} <: NSyntaxNode
-    n::T
+struct LnNode <: NSyntaxNode
+    n::NSyntaxNode
+
+    LnNode(n::NSyntaxNode) = new(n)
 end
-LnNode(n::NSyntaxNode) = LnNode{typeof(n)}(n)
+
 LnNode(n::NodeType) = LnNode(_make_node(n))
 
-struct LogNode{T<:NSyntaxNode} <: NSyntaxNode
-    n::T
-end
-LogNode(n::NSyntaxNode) = LogNode{typeof(n)}(n)
-LogNode(n::NodeType) = LogNode(_make_node(n))
+struct LogNode <: NSyntaxNode
+    n::NSyntaxNode
 
+    LogNode(n::NSyntaxNode) = new(n)
+end
+
+LogNode(n::NodeType) = LogNode(_make_node(n))
 ### Spaces function 
 
 setvar(space::SymbolicSpace{T}, s::Symbol, val) where T = (space.var[s] = convert(T, val))
