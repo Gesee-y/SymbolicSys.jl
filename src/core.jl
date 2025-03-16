@@ -5,7 +5,7 @@
 abstract type AbstractCodeSpace end
 abstract type NSyntaxNode end
 
-const NodeType = Union{Number, NSyntaxNode, Symbol}
+const NodeType = Union{Number, Expr, Symbol}
 
 struct NSyntaxTree{T <: NSyntaxNode}
     root::T
@@ -26,16 +26,16 @@ end
 ## Better use immutable struct for this. type parameters reduce the need for the compiler to infer fields type 
 
 
-struct ConstNode{T <: Number}
+struct ConstNode{T <: Number} <: NSyntaxNode
     n::T
 end
 ConstNode(n::Number) = ConstNode{typeof(n)}(n)
 
-struct SymbNode
+struct SymbNode <: NSyntaxNode
     n::Symbol
 end
 
-struct AddNode{T <: NSyntaxNode, N <: NSyntaxNode}
+struct AddNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
     n1::T
     n2::N
     AddNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
@@ -54,7 +54,7 @@ function AddNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 AddNode(n1::NodeType, n2::NodeType) = AddNode(_make_node(n1), _make_node(n2))
 
-struct SubNode{T <: NSyntaxNode, N <: NSyntaxNode}
+struct SubNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
     n1::T
     n2::N
     SubNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
@@ -71,7 +71,7 @@ function SubNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 SubNode(n1::NodeType, n2::NodeType) = SubNode(_make_node(n1), _make_node(n2))
 
-struct ProdNode{T <: NSyntaxNode, N <: NSyntaxNode}
+struct ProdNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
     n1::T
     n2::N
     ProdNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
@@ -92,7 +92,7 @@ function ProdNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 ProdNode(n1::NodeType, n2::NodeType) = ProdNode(_make_node(n1), _make_node(n2))
 
-struct DivNode{T <: NSyntaxNode, N <: NSyntaxNode}
+struct DivNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
     n1::T
     n2::N
     DivNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
@@ -112,7 +112,7 @@ function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
 end
 DivNode(n1::NodeType, n2::NodeType) = DivNode(_make_node(n1), _make_node(n2))
 
-struct PowNode{T <: NSyntaxNode, N <: NSyntaxNode}
+struct PowNode{T <: NSyntaxNode, N <: NSyntaxNode} <: NSyntaxNode
     n1::T
     n2::N
     PowNode{T, N}(n1::T, n2::N) where {T <: NSyntaxNode, N <: NSyntaxNode} = new{T,N}(n1, n2)
