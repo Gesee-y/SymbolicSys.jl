@@ -97,16 +97,18 @@ struct DivNode <: NSyntaxNode
     n2::NSyntaxNode
     
     function DivNode(n1::NSyntaxNode, n2::NSyntaxNode)
-        if n1 isa ConstNode && n2 isa ConstNode
-            return ConstNode(n1.n / n2.n)
-        elseif iszero(n1) && !iszero(n2)
-            return ConstNode(0)
-        elseif iszero(n2)
+        if iszero(n2)
             throw(ZeroDivisionError("can create a node that divide by 0"))
-        elseif isone(n2)
-            return n1
         else
-            return DivNode(n1, n2)
+            if n1 isa ConstNode && n2 isa ConstNode
+                return ConstNode(n1.n / n2.n)
+            elseif iszero(n1)
+                return ConstNode(0)
+            elseif isone(n2)
+                return n1
+            else
+                return new(n1, n2)
+            end
         end
     end
 end
@@ -117,7 +119,7 @@ struct PowNode <: NSyntaxNode
     n1::NSyntaxNode
     n2::NSyntaxNode
     
-    function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
+      function PowNode(n1::NSyntaxNode, n2::NSyntaxNode)
         if n1 isa ConstNode && n2 isa ConstNode
             return ConstNode(n1.n ^ n2.n)
         elseif iszero(n1)
