@@ -1,12 +1,12 @@
 ################# Operations on a symbolic system ####################
 
 # ToDo : Fix this for node evaluating to zero
-iszero(n::NSyntaxNode) = false
-iszero(n::ConstNode) = iszero(n.n)
+Base.iszero(n::NSyntaxNode) = false
+Base.iszero(n::ConstNode) = iszero(n.n)
 
 # TODO : Fix this for node evaluating to one
-isone(n::NSyntaxNode) = false
-isone(n::ConstNode) = isone(n.n)
+Base.isone(n::NSyntaxNode) = false
+Base.isone(n::ConstNode) = isone(n.n)
 get_children(A::AbstractArray) = A
 get_children(e::Expr) = e.args
 get_children(n) = ()
