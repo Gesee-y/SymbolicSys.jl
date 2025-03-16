@@ -165,6 +165,7 @@ getop(::PowNode) = :^
 getop(::LnNode) = :log
 getop(::LogNode) = :log10
 
+toexpr(tree::NSyntaxTree) = toexpr(tree.root)
 toexpr(n::ConstNode) = n.n
 toexpr(n::SymbNode) = n.n
 toexpr(n::NSyntaxNode) = Expr(:call, getop(n), toexpr(n.n1), toexpr(n.n2))
