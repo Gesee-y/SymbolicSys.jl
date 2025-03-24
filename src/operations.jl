@@ -10,6 +10,9 @@ Base.isone(n::ConstNode) = isone(n.n)
 get_children(A::AbstractArray) = A
 get_children(e::Expr) = e.args
 get_children(n) = ()
+get_children(n::NSyntaxNode) = [getfield(n,f) for f in fieldnames(n)]
+get_children(n::SymbNode) = ()
+get_children(n::ConstNode) = ()
 
 is_leave(n) = isempty(get_children(n))
 
@@ -28,3 +31,48 @@ derivate(n::LnNode) = DivNode(derivate(n.n), n.n)
 derivate(n::LogNode) = DivNode(derivate(n.n), ProdNode(n.n, ConstNode(log(10))))
 
 derivate(tree::NSyntaxTree) = NSyntaxTree(derivate(tree.root))
+
+
+### Traversal utilities
+
+function DFS_traversal(tree::NSyntaxTree)
+
+    stack = Pair[tree.root => false]
+    result = NSyntaxNode[]
+
+    while!isempty(stack)
+        node, visited = pop!(stack)
+        
+        if visited
+            push!(result, node)
+        else
+            if isleave(node)
+                push!(result, node)
+            else
+                push!(stack, node => true)
+
+                for ch in get_children(node)
+                    push!(stack, ch => false)
+                end
+            end
+        end
+    end
+
+    return result
+end
+
+function BFS_traversal(tree::NSyntaxTree)
+
+    stack = NSyntaxNode[tree.root]
+    result = NSyntaxNode[tree.root]
+
+    while !isempty(stack)
+        
+        node = pop!(stack)
+
+        for ch in get_children(node)
+            push!(result, ch)
+            push!(stack, ch)
+        end
+    end
+end
