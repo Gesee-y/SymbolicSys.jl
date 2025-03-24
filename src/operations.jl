@@ -103,9 +103,11 @@ function _iterative_deriv(tree::NSyntaxTree)
             l = get_child_count(n)
 
             # placeholder measure to derivate
-            # _derivate will use multiple dispatch to customize calls depending on the node, the `der[der_idx:(der_idx+l)]` give the corresponding derivative of the children of the current node
+            # _derivate will use multiple dispatch to customize calls depending on the node, the `der_arr[der_idx:(der_idx+l)]` give the corresponding derivative of the children of the current node
 
-            der = _derivate(n, der[der_idx:(der_idx+l)]
+            der = _derivate(n, der_arr[der_idx:(der_idx+l)]
+
+            push!(der_arr, der)
             der_idx += l
         end
     end
