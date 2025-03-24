@@ -97,7 +97,7 @@ function _iterative_deriv(tree::NSyntaxTree)
             ## if we encounter a leave, it means the derivate of the node can be obtained just from itself
 
             der = _derivate(n)
-            push!(der_array, n)
+            push!(der_array, der)
             idx += 1
         else
             l = get_child_count(n)
