@@ -108,7 +108,7 @@ function _iterative_deriv(tree::NSyntaxTree)
             der = _derivate(n, der_arr[der_idx:(der_idx+l)]
 
             push!(der_arr, der)
-            der_idx += l
+            der_idx += l+1
         end
     end
 
