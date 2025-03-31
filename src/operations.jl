@@ -42,7 +42,7 @@ function DFS_traversal(tree::NSyntaxTree)
     stack = Pair[tree.root => false]
     result = NSyntaxNode[]
 
-    while!isempty(stack)
+    while !isempty(stack)
         node, visited = pop!(stack)
         
         if visited
