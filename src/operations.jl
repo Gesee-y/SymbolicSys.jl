@@ -77,35 +77,25 @@ function BFS_traversal(tree::NSyntaxTree)
 end
 
 function _iterative_deriv(tree::NSyntaxTree)
-
     node_arr = DFS_traversal(tree)
     der_arr = NSyntaxNode[]
-
-    idx = 1
-    der_idx = 1
-    der::NSyntaxNode = ConstNode(0)
-
-    while (idx <= length(node_arr))
-        n = node_arr[idx]
+    
+    while !isempty(node_arr)
+        n = pop!(node_arr)
 
         if isleave(n)
-            ## if we encounter a leave, it means the derivate of the node can be obtained just from itself
-
-            der = _derivate(n)
-            push!(der_array, der)
-            idx += 1
-        else
-            l = get_child_count(n)
-
-            # placeholder measure to derivate
-            # _derivate will use multiple dispatch to customize calls depending on the node, the `der_arr[der_idx:(der_idx+l)]` give the corresponding derivative of the children of the current node
-
-            der = _derivate(n, der_arr[der_idx:(der_idx+l)]
-
+            ## if we encounter a leaf, it means the derivative of the node can be obtained just from itself
+            der = derivate(n)
             push!(der_arr, der)
-            der_idx += l+1
+        else
+            children = get_children(n)
+            l = length(children)
+            
+            # Compute the derivatives of the child nodes
+            child_ders = [pop!(der_arr) for _ in 1:l]
+            push!(der_arr, derivate(n, reverse(child_ders)...))
         end
     end
 
-    return NSyntaxTree(der)
+    return NSyntaxTree(pop!(der_arr))
 end
