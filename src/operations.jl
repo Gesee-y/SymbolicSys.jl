@@ -48,14 +48,9 @@ function DFS_traversal(tree::NSyntaxTree)
         if visited
             push!(result, node)
         else
-            if isleave(node)
-                push!(result, node)
-            else
-                push!(stack, node => true)
-
-                for ch in get_children(node)
-                    push!(stack, ch => false)
-                end
+            push!(stack, node => true)
+            for ch in get_children(node)
+                push!(stack, ch => false)
             end
         end
     end
