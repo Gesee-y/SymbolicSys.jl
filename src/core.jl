@@ -5,7 +5,8 @@
 abstract type AbstractCodeSpace end
 abstract type NSyntaxNode end
 
-const NodeType = Union{Number, Symbol, Expr}
+const NodeType = Union{Number, Symbol, Expr, NSyntaxNode}
+const NodeorNumber = Union{Number, NSyntaxNode}
 
 struct NSyntaxTree{T <: NSyntaxNode}
     root::T
@@ -172,6 +173,15 @@ getop(::PowNode) = :^
 getop(::LnNode) = :log
 getop(::LogNode) = :log10
 
+
+Base.:+(n1::NodeorNumber, n2:: NodeorNumber) = AddNode(n1,n2)
+Base.:+(n1::Number, n2:: NSyntaxNode) = AddNode(n2,n1)
+Base.:-(n1::NodeorNumber, n2:: NodeorNumber) = SubNode(n1,n2)
+Base.:*(n1::NodeorNumber, n2:: NodeorNumber) = ProdNode(n1,n2)
+Base.:*(n1::NSyntaxNode, n2::Number) = ProdNode(n2,n1)
+Base.:^(n1::NodeorNumber, n2:: NodeorNumber) = PowNode(n1,n2)
+Base.:/(n1::NodeorNumber, n2:: NodeorNumber) = DivNode(n1,n2)
+
 toexpr(tree::NSyntaxTree) = toexpr(tree.root)
 toexpr(n::ConstNode) = n.n
 toexpr(n::SymbNode) = n.n
@@ -181,6 +191,7 @@ toexpr(n::LogNode) = Expr(:call, getop(n), toexpr(n[1]))
 
 totree(ex::Expr) = NSyntaxTree(_make_node(ex))
 
+_make_node(n::NSyntaxNode) = n
 _make_node(n::Number) = ConstNode(n)
 _make_node(s::Symbol) = SymbNode(s)
 _make_node(::Val{:+}, n1::NodeType, n2::NodeType) = AddNode(n1, n2)
