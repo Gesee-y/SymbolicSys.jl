@@ -22,7 +22,7 @@ negate(n::NSyntaxNode) = n
 
 derivate(n::Number, var::Symbol) = 0
 derivate(n::ConstNode, var::Symbol) = ConstNode(0)
-derivate(n::SymbNode, var::Symbol) = n.var == var ? ConstNode(1) : n
+derivate(n::SymbNode, var::Symbol) = n.n == var ? ConstNode(1) : n
 
 derivate(n::AddNode, var::Symbol) = derivate(n.n1, var) + derivate(n.n2, var)
 derivate(n::SubNode, var::Symbol) = derivate(n.n1, var) - derivate(n.n2, var)
