@@ -20,25 +20,25 @@ isleave(n) = isempty(get_children(n))
 
 negate(n::NSyntaxNode) = n
 
-derivate(n::Number) = 0
-derivate(n::ConstNode) = ConstNode(0)
-derivate(n::SymbNode) = ConstNode(1)
+derivate(n::Number, var::Symbol) = 0
+derivate(n::ConstNode, var::Symbol) = ConstNode(0)
+derivate(n::SymbNode, var::Symbol) = n.var == var ? ConstNode(1) : n
 
-derivate(n::AddNode) = derivate(n.n1) + derivate(n.n2)
-derivate(n::SubNode) = derivate(n.n1) - derivate(n.n2)
-derivate(n::ProdNode) = derivate(n.n1)*n.n2 + n.n1*derivate(n.n2)
-derivate(n::DivNode) = (derivate(n.n1)*n.n2 - n.n1*derivate(n.n2))/ n[2]^2
-derivate(n::PowNode) = begin 
+derivate(n::AddNode, var::Symbol) = derivate(n.n1, var) + derivate(n.n2, var)
+derivate(n::SubNode, var::Symbol) = derivate(n.n1, var) - derivate(n.n2, var)
+derivate(n::ProdNode, var::Symbol) = derivate(n.n1, var)*n.n2 + n.n1*derivate(n.n2, var)
+derivate(n::DivNode, var::Symbol) = (derivate(n.n1, var)*n.n2 - n.n1*derivate(n.n2))/ n[2]^2
+derivate(n::PowNode, var::Symbol) = begin 
     if n.n2 isa ConstNode
-        return n.n2*derivate(n.n1)*n.n1^(n.n2.n-1)
+        return n.n2*derivate(n.n1, var)*n.n1^(n.n2.n-1)
     else
-        return n.n1^n.n2 * (derivate(n.n2)*LnNode(n.n1) + n.n2* derivate(n.n1))/n.n1
+        return n.n1^n.n2 * (derivate(n.n2, var)*LnNode(n.n1) + n.n2* derivate(n.n1, var))/n.n1
     end
 end
-derivate(n::LnNode) = derivate(n.n)/n.n
-derivate(n::LogNode) = derivate(n.n)/ (n.n*log(10))
+derivate(n::LnNode, var::Symbol) = derivate(n.n, var)/n.n
+derivate(n::LogNode, var::Symbol) = derivate(n.n, var)/ (n.n*log(10))
 
-derivate(tree::NSyntaxTree) = NSyntaxTree(derivate(tree.root))
+derivate(tree::NSyntaxTree, var::Symbol) = NSyntaxTree(derivate(tree.root, var))
 
 
 ### Traversal utilities
